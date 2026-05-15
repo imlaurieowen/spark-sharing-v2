@@ -1,0 +1,26 @@
+<% if (typeof metaTags !== 'undefined' && metaTags) { %>
+  <meta name="description" content="<%= metaTags.description || '' %>">
+  <meta property="og:title" content="<%= metaTags.ogTitle || title || 'Spark Sharing' %>">
+  <meta property="og:description" content="<%= metaTags.ogDescription || metaTags.description || '' %>">
+  <meta property="og:type" content="<%= metaTags.ogType || 'website' %>">
+  <meta property="og:url" content="<%= metaTags.ogUrl || baseUrl %>">
+  <% if (metaTags.ogImage) { %>
+  <meta property="og:image" content="<%= metaTags.ogImage %>">
+  <% } %>
+  <meta name="twitter:card" content="<%= metaTags.twitterCard || 'summary_large_image' %>">
+  <meta name="twitter:title" content="<%= metaTags.twitterTitle || metaTags.ogTitle || title || 'Spark Sharing' %>">
+  <meta name="twitter:description" content="<%= metaTags.twitterDescription || metaTags.description || '' %>">
+  <% if (metaTags.twitterImage) { %>
+  <meta name="twitter:image" content="<%= metaTags.twitterImage %>">
+  <% } %>
+<% } %>
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/styles.css">
+
+<% if (typeof jsonLd !== 'undefined' && jsonLd) { %>
+<script type="application/ld+json"><%- jsonLd %></script>
+<% } %>

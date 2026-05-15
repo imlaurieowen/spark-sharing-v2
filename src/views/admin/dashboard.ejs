@@ -1,0 +1,184 @@
+<div class="container">
+  <div class="dashboard">
+    <div class="dashboard-header">
+      <h1>Welcome back, <%= user.name %></h1>
+      <a href="/admin/campaigns/new" class="btn btn-primary">Create Campaign</a>
+    </div>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value"><%= stats.campaigns %></div>
+        <div class="stat-label">Campaigns</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value"><%= stats.pageViews %></div>
+        <div class="stat-label">Page Views (7d)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value"><%= stats.shares %></div>
+        <div class="stat-label">Share Clicks (7d)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value"><%= stats.leads %></div>
+        <div class="stat-label">New Leads (7d)</div>
+      </div>
+    </div>
+
+    <div class="dashboard-section">
+      <div class="section-header">
+        <h2>Recent Campaigns</h2>
+        <a href="/admin/campaigns" class="btn btn-outline btn-sm">View All</a>
+      </div>
+
+      <% if (recentCampaigns.length === 0) { %>
+        <div class="empty-state">
+          <p>No campaigns yet. Create your first campaign to get started.</p>
+          <a href="/admin/campaigns/new" class="btn btn-primary">Create Campaign</a>
+        </div>
+      <% } else { %>
+        <div class="campaigns-list">
+          <% recentCampaigns.forEach(campaign => { %>
+            <a href="/admin/campaigns/<%= campaign.id %>" class="campaign-item">
+              <div class="campaign-info">
+                <h3><%= campaign.title %></h3>
+                <span class="campaign-date">
+                  Created <%= new Date(campaign.created_at).toLocaleDateString() %>
+                </span>
+              </div>
+              <div class="campaign-arrow">&rarr;</div>
+            </a>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<style>
+  .dashboard {
+    padding: var(--spacing-8) 0;
+  }
+
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-8);
+  }
+
+  .dashboard-header h1 {
+    font-size: var(--font-size-3xl);
+    color: var(--color-gray-900);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-8);
+  }
+
+  .stat-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: var(--font-size-4xl);
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+
+  .stat-label {
+    color: var(--color-gray-500);
+    font-size: var(--font-size-sm);
+    margin-top: var(--spacing-1);
+  }
+
+  .dashboard-section {
+    background: var(--color-white);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-4);
+  }
+
+  .section-header h2 {
+    font-size: var(--font-size-xl);
+    color: var(--color-gray-900);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: var(--spacing-8);
+    color: var(--color-gray-500);
+  }
+
+  .empty-state p {
+    margin-bottom: var(--spacing-4);
+  }
+
+  .campaigns-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+
+  .campaign-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-4);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .campaign-item:hover {
+    background: var(--color-gray-50);
+    border-color: var(--color-gray-300);
+    text-decoration: none;
+  }
+
+  .campaign-info h3 {
+    color: var(--color-gray-900);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+  }
+
+  .campaign-date {
+    color: var(--color-gray-500);
+    font-size: var(--font-size-sm);
+  }
+
+  .campaign-arrow {
+    color: var(--color-gray-400);
+    font-size: var(--font-size-xl);
+  }
+
+  @media (max-width: 768px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-header {
+      flex-direction: column;
+      gap: var(--spacing-4);
+      text-align: center;
+    }
+  }
+</style>

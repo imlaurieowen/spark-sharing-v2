@@ -1,0 +1,14 @@
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="logo">Spark Sharing</a>
+    <nav class="nav">
+      <% if (typeof user !== 'undefined' && user) { %>
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/campaigns">Campaigns</a>
+        <a href="/api/auth/logout" class="btn btn-outline">Logout</a>
+      <% } else { %>
+        <a href="/admin/login" class="btn btn-primary">Login</a>
+      <% } %>
+    </nav>
+  </div>
+</header>

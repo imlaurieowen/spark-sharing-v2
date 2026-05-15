@@ -1,0 +1,406 @@
+<div class="container">
+  <div class="campaign-form-page">
+    <div class="page-header">
+      <a href="/admin/campaigns/<%= campaign.id %>" class="back-link">&larr; Back to Campaign</a>
+      <h1>Edit Campaign</h1>
+    </div>
+
+    <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+      <div class="alert alert-error">
+        <% errors.forEach(error => { %>
+          <p><%= error.msg %></p>
+        <% }); %>
+      </div>
+    <% } %>
+
+    <form action="/admin/campaigns/<%= campaign.id %>?_method=PUT" method="POST" enctype="multipart/form-data" class="card" id="campaignForm">
+      <div class="form-group">
+        <label for="title" class="form-label">Campaign Title *</label>
+        <input type="text" id="title" name="title" class="form-input" value="<%= campaign.title %>" required>
+      </div>
+
+      <div class="form-group">
+        <label for="slug" class="form-label">URL Slug</label>
+        <div class="slug-input-wrapper">
+          <span class="slug-prefix">/s/campaign/</span>
+          <input type="text" id="slug" name="slug" class="form-input slug-input" value="<%= campaign.slug %>" placeholder="my-campaign-name">
+        </div>
+        <p class="slug-preview">Share URL: <span id="slugPreview"><%= process.env.BASE_URL || 'http://localhost:3000' %>/s/campaign/<%= campaign.slug %></span></p>
+        <p class="text-gray text-sm">Only lowercase letters, numbers, and hyphens allowed. Leave empty to keep current slug.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="description" class="form-label">Description</label>
+        <textarea id="description" name="description" class="form-textarea" rows="2"><%= campaign.description || '' %></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Copy Options *</label>
+        <p class="text-gray text-sm mb-4">Different versions of copy for recipients to choose from.</p>
+
+        <div id="copyContainer"></div>
+
+        <button type="button" class="btn btn-outline btn-sm mt-4" id="addCopyBtn">
+          + Add Another Copy Option
+        </button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Current Images</label>
+        <% if (images.length > 0) { %>
+          <div class="current-images" id="currentImages">
+            <% images.forEach(function(image) { %>
+              <div class="current-image" data-id="<%= image.id %>">
+                <img src="<%= image.image_url %>" alt="">
+                <button type="button" class="delete-image-btn" data-image-id="<%= image.id %>">&times;</button>
+              </div>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <p class="text-gray text-sm">No images uploaded yet.</p>
+        <% } %>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Add More Images</label>
+        <div class="file-upload">
+          <input type="file" id="imageInput" name="images" multiple accept="image/*" class="file-input">
+          <div class="file-upload-content">
+            <div class="file-upload-icon">+</div>
+            <p>Click to upload images</p>
+          </div>
+        </div>
+        <div id="previewContainer" class="image-preview"></div>
+      </div>
+
+      <div class="form-actions">
+        <a href="/admin/campaigns/<%= campaign.id %>" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+
+    <div class="danger-zone card mt-8">
+      <h3>Danger Zone</h3>
+      <p>Permanently delete this campaign and all its images.</p>
+      <form action="/admin/campaigns/<%= campaign.id %>?_method=DELETE" method="POST" id="deleteForm">
+        <button type="submit" class="btn btn-danger">Delete Campaign</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  .campaign-form-page { padding: var(--spacing-8) 0; max-width: 700px; }
+  .page-header { margin-bottom: var(--spacing-6); }
+  .back-link { color: var(--color-gray-500); font-size: var(--font-size-sm); display: inline-block; margin-bottom: var(--spacing-2); }
+  .page-header h1 { font-size: var(--font-size-3xl); color: var(--color-gray-900); }
+
+  .copy-option {
+    background: var(--color-gray-50);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-3);
+  }
+  .copy-option-header { display: flex; gap: var(--spacing-2); margin-bottom: var(--spacing-3); }
+  .copy-label-input { flex: 1; }
+  .remove-copy-btn { color: var(--color-accent-pink); border-color: var(--color-accent-pink); padding: 0 12px; }
+
+  .current-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: var(--spacing-2); }
+  .current-image { position: relative; }
+  .current-image img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--color-gray-200); }
+  .delete-image-btn {
+    position: absolute; top: 4px; right: 4px;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--color-accent-pink); color: white;
+    border: none; cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .file-upload {
+    position: relative;
+    border: 2px dashed var(--color-gray-300);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-6);
+    text-align: center;
+    cursor: pointer;
+  }
+  .file-upload:hover { border-color: var(--color-secondary); background: var(--color-gray-50); }
+  .file-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .file-upload-icon { font-size: 1.5rem; color: var(--color-gray-400); }
+
+  .image-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: var(--spacing-2);
+    margin-top: var(--spacing-4);
+  }
+  .preview-item { position: relative; }
+  .preview-item img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-md); }
+  .preview-remove {
+    position: absolute; top: 4px; right: 4px;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--color-accent-pink); color: white;
+    border: none; cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .form-actions {
+    display: flex; justify-content: flex-end; gap: var(--spacing-3);
+    margin-top: var(--spacing-6); padding-top: var(--spacing-6);
+    border-top: 1px solid var(--color-gray-200);
+  }
+
+  .danger-zone { border-color: var(--color-accent-pink); background: #FEF2F2; }
+  .danger-zone h3 { color: #991B1B; margin-bottom: var(--spacing-2); }
+  .danger-zone p { color: var(--color-gray-600); margin-bottom: var(--spacing-4); }
+
+  .slug-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--color-gray-50);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+  .slug-prefix {
+    padding: 0 var(--spacing-3);
+    color: var(--color-gray-500);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+    background: var(--color-gray-100);
+    border-right: 1px solid var(--color-gray-200);
+    height: 42px;
+    display: flex;
+    align-items: center;
+  }
+  .slug-input {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+  }
+  .slug-input:focus {
+    box-shadow: none;
+  }
+  .slug-preview {
+    margin-top: var(--spacing-2);
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-600);
+  }
+  .slug-preview span {
+    font-family: monospace;
+    background: var(--color-gray-100);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    color: var(--color-secondary);
+  }
+</style>
+
+<script>
+(function() {
+  // Existing copies from server
+  var existingCopies = <%- JSON.stringify(copies || []) %>;
+  var originalSlug = '<%= campaign.slug %>';
+
+  // State
+  var copyCount = 0;
+  var fileList = [];
+
+  // DOM refs
+  var copyContainer = document.getElementById('copyContainer');
+  var addCopyBtn = document.getElementById('addCopyBtn');
+  var imageInput = document.getElementById('imageInput');
+  var previewContainer = document.getElementById('previewContainer');
+  var currentImages = document.getElementById('currentImages');
+  var deleteForm = document.getElementById('deleteForm');
+  var slugInput = document.getElementById('slug');
+  var slugPreview = document.getElementById('slugPreview');
+
+  // Event: Slug input - sanitize and update preview
+  var baseUrl = '<%= process.env.BASE_URL || "http://localhost:3000" %>';
+  slugInput.addEventListener('input', function() {
+    // Sanitize: lowercase, replace spaces with hyphens, remove invalid chars
+    var value = this.value
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-');
+
+    this.value = value;
+    var displaySlug = value || originalSlug;
+    slugPreview.textContent = baseUrl + '/s/campaign/' + displaySlug;
+  });
+
+  // Initialize copies
+  if (existingCopies.length > 0) {
+    for (var i = 0; i < existingCopies.length; i++) {
+      addCopyOption(existingCopies[i]);
+    }
+  } else {
+    addCopyOption(null);
+  }
+
+  // Event: Add copy button
+  addCopyBtn.addEventListener('click', function() {
+    addCopyOption(null);
+  });
+
+  // Event: Image input change
+  imageInput.addEventListener('change', function() {
+    var files = this.files;
+    for (var i = 0; i < files.length; i++) {
+      var file = files[i];
+      var exists = false;
+      for (var j = 0; j < fileList.length; j++) {
+        if (fileList[j].name === file.name && fileList[j].size === file.size) {
+          exists = true;
+          break;
+        }
+      }
+      if (!exists) {
+        fileList.push(file);
+      }
+    }
+    renderPreviews();
+    syncFileInput();
+  });
+
+  // Event: Delete existing images
+  if (currentImages) {
+    currentImages.addEventListener('click', function(e) {
+      var btn = e.target.closest('.delete-image-btn');
+      if (!btn) return;
+
+      var imageId = btn.getAttribute('data-image-id');
+      if (!confirm('Delete this image?')) return;
+
+      fetch('/api/campaigns/images/' + imageId, { method: 'DELETE' })
+        .then(function(res) {
+          if (res.ok) {
+            var el = document.querySelector('[data-id="' + imageId + '"]');
+            if (el) el.remove();
+          } else {
+            alert('Failed to delete image');
+          }
+        })
+        .catch(function() {
+          alert('Failed to delete image');
+        });
+    });
+  }
+
+  // Event: Delete campaign confirmation
+  deleteForm.addEventListener('submit', function(e) {
+    if (!confirm('Are you sure? This cannot be undone.')) {
+      e.preventDefault();
+    }
+  });
+
+  function addCopyOption(copy) {
+    copyCount++;
+    var id = copyCount;
+
+    var div = document.createElement('div');
+    div.className = 'copy-option';
+    div.id = 'copy-' + id;
+
+    // Hidden input for existing copy ID
+    if (copy && copy.id) {
+      var hiddenInput = document.createElement('input');
+      hiddenInput.type = 'hidden';
+      hiddenInput.name = 'copyId';
+      hiddenInput.value = copy.id;
+      div.appendChild(hiddenInput);
+    }
+
+    var header = document.createElement('div');
+    header.className = 'copy-option-header';
+
+    var labelInput = document.createElement('input');
+    labelInput.type = 'text';
+    labelInput.name = 'copyLabel';
+    labelInput.className = 'form-input copy-label-input';
+    labelInput.placeholder = 'Label';
+    labelInput.value = copy && copy.label ? copy.label : '';
+
+    var removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'btn btn-sm btn-outline remove-copy-btn';
+    removeBtn.innerHTML = '&times;';
+    removeBtn.addEventListener('click', function() {
+      removeCopyOption(id);
+    });
+
+    header.appendChild(labelInput);
+    header.appendChild(removeBtn);
+
+    var textarea = document.createElement('textarea');
+    textarea.name = 'copyText';
+    textarea.className = 'form-textarea';
+    textarea.rows = 4;
+    textarea.required = true;
+    textarea.value = copy && copy.copy_text ? copy.copy_text : '';
+
+    div.appendChild(header);
+    div.appendChild(textarea);
+    copyContainer.appendChild(div);
+
+    updateRemoveButtons();
+  }
+
+  function removeCopyOption(id) {
+    var el = document.getElementById('copy-' + id);
+    if (el) el.remove();
+    updateRemoveButtons();
+  }
+
+  function updateRemoveButtons() {
+    var options = copyContainer.querySelectorAll('.copy-option');
+    var btns = copyContainer.querySelectorAll('.remove-copy-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].style.display = options.length > 1 ? 'block' : 'none';
+    }
+  }
+
+  function renderPreviews() {
+    previewContainer.innerHTML = '';
+    for (var i = 0; i < fileList.length; i++) {
+      (function(index) {
+        var file = fileList[index];
+        var div = document.createElement('div');
+        div.className = 'preview-item';
+
+        var img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.alt = 'Preview';
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'preview-remove';
+        btn.innerHTML = '&times;';
+        btn.addEventListener('click', function() {
+          removeFile(index);
+        });
+
+        div.appendChild(img);
+        div.appendChild(btn);
+        previewContainer.appendChild(div);
+      })(i);
+    }
+  }
+
+  function removeFile(index) {
+    fileList.splice(index, 1);
+    renderPreviews();
+    syncFileInput();
+  }
+
+  function syncFileInput() {
+    var dt = new DataTransfer();
+    for (var i = 0; i < fileList.length; i++) {
+      dt.items.add(fileList[i]);
+    }
+    imageInput.files = dt.files;
+  }
+})();
+</script>

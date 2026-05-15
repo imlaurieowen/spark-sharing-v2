@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= campaign.title %> | Spark Sharing</title>
+
+  <meta name="description" content="<%= campaign.description || campaign.title %>">
+  <meta property="og:title" content="<%= campaign.title %>">
+  <meta property="og:description" content="<%= campaign.description || campaign.title %>">
+  <meta property="og:url" content="<%= shareUrl %>">
+  <% if (images.length > 0) { %>
+  <meta property="og:image" content="<%= images[0].image_url %>">
+  <% } %>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f8fafc;
+      min-height: 100vh;
+      color: #1e293b;
+    }
+
+    .header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 16px 24px;
+    }
+    .header-inner {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-weight: 700;
+      font-size: 18px;
+      color: #1e293b;
+      text-decoration: none;
+    }
+    .campaign-badge {
+      font-size: 13px;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 6px 12px;
+      border-radius: 100px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* Progress indicator */
+    .progress {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 40px;
+    }
+    .progress-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      transition: all 0.3s;
+    }
+    .progress-dot.active {
+      background: #3b82f6;
+      width: 32px;
+      border-radius: 5px;
+    }
+    .progress-dot.done {
+      background: #22c55e;
+    }
+
+    /* Steps */
+    .step {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .step.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .step-number {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      background: #3b82f6;
+      color: white;
+      border-radius: 50%;
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 32px;
+      margin-bottom: 16px;
+    }
+    .step-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+    .step-header p {
+      color: #64748b;
+      font-size: 15px;
+    }
+
+    /* Image grid */
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .image-item {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+      border: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    .image-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .image-item:hover {
+      border-color: #93c5fd;
+      transform: scale(1.02);
+    }
+    .image-item.selected {
+      border-color: #3b82f6;
+    }
+    .image-item.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      background: #3b82f6;
+      border-radius: 50%;
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Copy selector (carousel style) */
+    .copy-selector {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .copy-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .copy-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #3b82f6;
+      background: #eff6ff;
+      padding: 4px 12px;
+      border-radius: 100px;
+    }
+    .copy-arrows {
+      display: flex;
+      gap: 8px;
+    }
+    .copy-arrow {
+      width: 36px;
+      height: 36px;
+      border: 1px solid #e2e8f0;
+      border-radius: 50%;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      color: #64748b;
+    }
+    .copy-arrow:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+    .copy-arrow:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .copy-text {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #334155;
+      white-space: pre-wrap;
+      min-height: 80px;
+    }
+    .copy-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #334155;
+      resize: vertical;
+    }
+    .copy-textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .copy-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .copy-counter {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    .edit-btn {
+      padding: 6px 12px;
+      background: #f1f5f9;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .edit-btn:hover {
+      background: #e2e8f0;
+      color: #475569;
+    }
+    .edit-btn.editing {
+      background: #3b82f6;
+      color: white;
+    }
+
+    /* Platform buttons */
+    .platform-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .platform-btn {
+      padding: 24px;
+      border-radius: 16px;
+      border: 2px solid #e2e8f0;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .platform-btn:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+    }
+    .platform-btn.selected {
+      border-color: #3b82f6;
+      background: #eff6ff;
+    }
+    .platform-btn svg {
+      width: 32px;
+      height: 32px;
+      margin-bottom: 8px;
+    }
+    .platform-btn .name {
+      font-weight: 600;
+      font-size: 15px;
+      color: #0f172a;
+    }
+
+    /* Action card */
+    .action-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .action-card.done {
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+    }
+    .action-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .action-num {
+      width: 28px;
+      height: 28px;
+      background: #f1f5f9;
+      border-radius: 50%;
+      font-weight: 600;
+      font-size: 13px;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .action-card.done .action-num {
+      background: #22c55e;
+      color: white;
+    }
+    .action-title {
+      font-weight: 600;
+      font-size: 15px;
+      color: #0f172a;
+    }
+    .action-btn {
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .action-btn.primary {
+      background: #3b82f6;
+      color: white;
+    }
+    .action-btn.primary:hover {
+      background: #2563eb;
+    }
+    .action-btn.secondary {
+      background: #f1f5f9;
+      color: #475569;
+    }
+    .action-btn.secondary:hover {
+      background: #e2e8f0;
+    }
+    .action-btn.done {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    /* Navigation */
+    .nav-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 32px;
+    }
+    .nav-btn {
+      flex: 1;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .nav-btn.back {
+      background: white;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+    }
+    .nav-btn.back:hover {
+      background: #f8fafc;
+    }
+    .nav-btn.next {
+      background: #3b82f6;
+      border: none;
+      color: white;
+    }
+    .nav-btn.next:hover {
+      background: #2563eb;
+    }
+
+    /* Success */
+    .success-screen {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background: #dcfce7;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 40px;
+    }
+    .success-screen h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+    .success-screen p {
+      color: #64748b;
+      font-size: 16px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #0f172a;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 14px;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 100;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 480px) {
+      .image-grid { grid-template-columns: 1fr 1fr; }
+      .platform-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-inner">
+      <a href="/" class="logo">Spark Sharing</a>
+      <span class="campaign-badge"><%= campaign.title %></span>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="progress" id="progress">
+      <div class="progress-dot active"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-dot"></div>
+    </div>
+
+    <!-- Step 1: Choose Image -->
+    <div class="step active" id="step1">
+      <div class="step-header">
+        <div class="step-number">1</div>
+        <h1>Choose your image</h1>
+        <p>Select an image to share with your post</p>
+      </div>
+
+      <% if (images.length > 0) { %>
+      <div class="image-grid" id="imageGrid">
+        <% images.forEach(function(image, index) { %>
+          <div class="image-item<%= index === 0 ? ' selected' : '' %>" data-index="<%= index %>" data-url="<%= image.image_url %>">
+            <img src="<%= image.image_url %>" alt="">
+          </div>
+        <% }); %>
+      </div>
+      <% } else { %>
+      <div style="text-align:center;padding:40px;color:#64748b;">No images available</div>
+      <% } %>
+
+      <div class="nav-buttons">
+        <button class="nav-btn next" id="toStep2">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Choose Copy -->
+    <div class="step" id="step2">
+      <div class="step-header">
+        <div class="step-number">2</div>
+        <h1>Choose your copy</h1>
+        <p>Pick the version that fits your style</p>
+      </div>
+
+      <div class="copy-selector">
+        <div class="copy-nav">
+          <span class="copy-label" id="copyLabel">Version 1</span>
+          <div class="copy-arrows">
+            <button class="copy-arrow" id="prevCopy" disabled>←</button>
+            <button class="copy-arrow" id="nextCopy">→</button>
+          </div>
+        </div>
+        <div class="copy-text" id="copyText"></div>
+        <textarea class="copy-textarea" id="copyTextarea" style="display:none;"></textarea>
+        <div class="copy-footer">
+          <span class="copy-counter" id="copyCounter">1 of 1</span>
+          <button type="button" class="edit-btn" id="editCopyBtn">✎ Edit text</button>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="nav-btn back" id="backTo1">← Back</button>
+        <button class="nav-btn next" id="toStep3">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Choose Platform -->
+    <div class="step" id="step3">
+      <div class="step-header">
+        <div class="step-number">3</div>
+        <h1>Where are you sharing?</h1>
+        <p>Select your platform</p>
+      </div>
+
+      <div class="platform-grid">
+        <button class="platform-btn selected" data-platform="linkedin">
+          <svg viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          <div class="name">LinkedIn</div>
+        </button>
+        <button class="platform-btn" data-platform="x">
+          <svg viewBox="0 0 24 24" fill="#000"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          <div class="name">X (Twitter)</div>
+        </button>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="nav-btn back" id="backTo2">← Back</button>
+        <button class="nav-btn next" id="toStep4">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Share Actions -->
+    <div class="step" id="step4">
+      <div class="step-header">
+        <div class="step-number">4</div>
+        <h1>Ready to post!</h1>
+        <p>Complete these steps to share</p>
+      </div>
+
+      <div class="action-card" id="action1">
+        <div class="action-header">
+          <div class="action-num">1</div>
+          <div class="action-title">Copy your text</div>
+        </div>
+        <button class="action-btn primary" id="copyBtn">Copy to clipboard</button>
+      </div>
+
+      <div class="action-card" id="action2">
+        <div class="action-header">
+          <div class="action-num">2</div>
+          <div class="action-title">Download image</div>
+        </div>
+        <a class="action-btn secondary" id="downloadBtn" href="" download target="_blank">Download image</a>
+      </div>
+
+      <div class="action-card" id="action3">
+        <div class="action-header">
+          <div class="action-num">3</div>
+          <div class="action-title">Open <span id="platformName">LinkedIn</span></div>
+        </div>
+        <button class="action-btn primary" id="openPlatformBtn">Open & paste your text</button>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="nav-btn back" id="backTo3">← Back</button>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div class="step" id="stepSuccess">
+      <div class="success-screen">
+        <div class="success-icon">🎉</div>
+        <h1>Thanks for sharing!</h1>
+        <p>Your post helps amplify the message.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Copied!</div>
+
+  <script>
+  (function() {
+    // Data
+    var images = <%- JSON.stringify(images.map(function(img) { return img.image_url; })) %>;
+    var copies = <%- JSON.stringify(copies && copies.length > 0 ? copies : [{ label: null, copy_text: campaign.social_copy || '' }]) %>;
+    var campaignId = <%= campaign.id %>;
+
+    // State
+    var currentStep = 1;
+    var selectedImageIndex = 0;
+    var selectedCopyIndex = 0;
+    var selectedPlatform = 'linkedin';
+    var copiedDone = false;
+    var downloadedDone = false;
+
+    // DOM
+    var steps = {
+      1: document.getElementById('step1'),
+      2: document.getElementById('step2'),
+      3: document.getElementById('step3'),
+      4: document.getElementById('step4'),
+      5: document.getElementById('stepSuccess')
+    };
+    var progressDots = document.querySelectorAll('.progress-dot');
+    var toast = document.getElementById('toast');
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(function() { toast.classList.remove('show'); }, 2000);
+    }
+
+    function goToStep(n) {
+      steps[currentStep].classList.remove('active');
+      currentStep = n;
+      steps[currentStep].classList.add('active');
+
+      // Update progress
+      for (var i = 0; i < progressDots.length; i++) {
+        progressDots[i].classList.remove('active', 'done');
+        if (i < n - 1) progressDots[i].classList.add('done');
+        else if (i === n - 1) progressDots[i].classList.add('active');
+      }
+    }
+
+    // Step 1: Image selection
+    var imageGrid = document.getElementById('imageGrid');
+    if (imageGrid) {
+      imageGrid.addEventListener('click', function(e) {
+        var item = e.target.closest('.image-item');
+        if (!item) return;
+        selectedImageIndex = parseInt(item.dataset.index);
+        var all = imageGrid.querySelectorAll('.image-item');
+        for (var i = 0; i < all.length; i++) all[i].classList.remove('selected');
+        item.classList.add('selected');
+      });
+    }
+
+    document.getElementById('toStep2').addEventListener('click', function() {
+      goToStep(2);
+      updateCopyDisplay();
+    });
+
+    // Step 2: Copy selection
+    var copyLabel = document.getElementById('copyLabel');
+    var copyText = document.getElementById('copyText');
+    var copyTextarea = document.getElementById('copyTextarea');
+    var copyCounter = document.getElementById('copyCounter');
+    var prevCopyBtn = document.getElementById('prevCopy');
+    var nextCopyBtn = document.getElementById('nextCopy');
+    var editCopyBtn = document.getElementById('editCopyBtn');
+    var isEditing = false;
+
+    function updateCopyDisplay() {
+      var copy = copies[selectedCopyIndex];
+      copyLabel.textContent = copy.label || ('Version ' + (selectedCopyIndex + 1));
+      copyText.textContent = copy.copy_text;
+      copyTextarea.value = copy.copy_text;
+      copyCounter.textContent = (selectedCopyIndex + 1) + ' of ' + copies.length;
+      prevCopyBtn.disabled = selectedCopyIndex === 0;
+      nextCopyBtn.disabled = selectedCopyIndex === copies.length - 1;
+    }
+
+    function toggleEditMode() {
+      isEditing = !isEditing;
+      if (isEditing) {
+        copyText.style.display = 'none';
+        copyTextarea.style.display = 'block';
+        copyTextarea.value = copies[selectedCopyIndex].copy_text;
+        copyTextarea.focus();
+        editCopyBtn.textContent = '✓ Done';
+        editCopyBtn.classList.add('editing');
+        // Disable arrows while editing
+        prevCopyBtn.disabled = true;
+        nextCopyBtn.disabled = true;
+      } else {
+        // Save the edited text
+        copies[selectedCopyIndex].copy_text = copyTextarea.value;
+        copyText.textContent = copyTextarea.value;
+        copyText.style.display = 'block';
+        copyTextarea.style.display = 'none';
+        editCopyBtn.textContent = '✎ Edit text';
+        editCopyBtn.classList.remove('editing');
+        // Re-enable arrows
+        prevCopyBtn.disabled = selectedCopyIndex === 0;
+        nextCopyBtn.disabled = selectedCopyIndex === copies.length - 1;
+      }
+    }
+
+    editCopyBtn.addEventListener('click', toggleEditMode);
+
+    prevCopyBtn.addEventListener('click', function() {
+      if (selectedCopyIndex > 0 && !isEditing) {
+        selectedCopyIndex--;
+        updateCopyDisplay();
+      }
+    });
+
+    nextCopyBtn.addEventListener('click', function() {
+      if (selectedCopyIndex < copies.length - 1 && !isEditing) {
+        selectedCopyIndex++;
+        updateCopyDisplay();
+      }
+    });
+
+    document.getElementById('backTo1').addEventListener('click', function() { goToStep(1); });
+    document.getElementById('toStep3').addEventListener('click', function() { goToStep(3); });
+
+    // Step 3: Platform selection
+    var platformBtns = document.querySelectorAll('.platform-btn');
+    platformBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        platformBtns.forEach(function(b) { b.classList.remove('selected'); });
+        btn.classList.add('selected');
+        selectedPlatform = btn.dataset.platform;
+      });
+    });
+
+    document.getElementById('backTo2').addEventListener('click', function() { goToStep(2); });
+    document.getElementById('toStep4').addEventListener('click', function() {
+      goToStep(4);
+      // Update step 4 UI
+      document.getElementById('downloadBtn').href = images[selectedImageIndex];
+      document.getElementById('platformName').textContent = selectedPlatform === 'linkedin' ? 'LinkedIn' : 'X';
+    });
+
+    // Step 4: Actions
+    var action1 = document.getElementById('action1');
+    var action2 = document.getElementById('action2');
+    var copyBtn = document.getElementById('copyBtn');
+    var downloadBtn = document.getElementById('downloadBtn');
+    var openPlatformBtn = document.getElementById('openPlatformBtn');
+
+    copyBtn.addEventListener('click', function() {
+      var text = copies[selectedCopyIndex].copy_text;
+      navigator.clipboard.writeText(text).then(function() {
+        showToast('Copied to clipboard!');
+        copiedDone = true;
+        action1.classList.add('done');
+        copyBtn.textContent = '✓ Copied!';
+        copyBtn.classList.remove('primary');
+        copyBtn.classList.add('done');
+      });
+    });
+
+    downloadBtn.addEventListener('click', function() {
+      downloadedDone = true;
+      action2.classList.add('done');
+    });
+
+    openPlatformBtn.addEventListener('click', function() {
+      var text = copies[selectedCopyIndex].copy_text;
+      var url;
+      if (selectedPlatform === 'linkedin') {
+        navigator.clipboard.writeText(text);
+        url = 'https://www.linkedin.com/feed/?shareActive=true';
+      } else {
+        url = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text);
+      }
+      window.open(url, '_blank', 'width=600,height=600');
+
+      // Track and show success
+      fetch('/api/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventType: 'share_click_' + selectedPlatform,
+          campaignId: campaignId
+        })
+      }).catch(function() {});
+
+      setTimeout(function() { goToStep(5); }, 500);
+    });
+
+    document.getElementById('backTo3').addEventListener('click', function() { goToStep(3); });
+
+    // Initialize
+    if (copies.length > 0) updateCopyDisplay();
+  })();
+  </script>
+</body>
+</html>

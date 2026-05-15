@@ -1,0 +1,365 @@
+<div class="landing-page">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1>Amplify Your Message with <span class="highlight">Coordinated Sharing</span></h1>
+        <p class="hero-subtitle">
+          Create campaigns with images and pre-written copy. Share one link.
+          Everyone posts in seconds.
+        </p>
+        <div class="hero-cta">
+          <a href="/admin/register" class="btn btn-primary btn-lg">Create Your First Campaign</a>
+          <span class="hero-note">Free to get started</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-it-works">
+    <div class="container">
+      <h2>How It Works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Create a Campaign</h3>
+          <p>Upload images and write the social copy you want everyone to share.</p>
+        </div>
+        <div class="step-arrow">&rarr;</div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Share One Link</h3>
+          <p>Send your campaign link via email, Slack, or WhatsApp to your team.</p>
+        </div>
+        <div class="step-arrow">&rarr;</div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Everyone Posts</h3>
+          <p>Recipients download images, copy text, and share to LinkedIn/X instantly.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="container">
+      <h2>Perfect For</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🚀</div>
+          <h3>Product Launches</h3>
+          <p>Coordinate your entire team to amplify launch announcements across social media.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎪</div>
+          <h3>Events & Conferences</h3>
+          <p>Get speakers and attendees sharing consistent messaging about your event.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📢</div>
+          <h3>PR & Announcements</h3>
+          <p>Enable stakeholders to share news with approved copy and imagery.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🏢</div>
+          <h3>Employer Branding</h3>
+          <p>Help employees share company news and culture content authentically.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Email Capture -->
+  <section class="email-capture">
+    <div class="container">
+      <div class="capture-box">
+        <h2>Get Early Access</h2>
+        <p>Be the first to know when we launch new features.</p>
+        <form id="leadForm" class="capture-form">
+          <input
+            type="email"
+            name="email"
+            placeholder="Enter your email"
+            class="form-input"
+            required
+          >
+          <button type="submit" class="btn btn-secondary">Sign Up</button>
+        </form>
+        <p id="formMessage" class="form-message"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="final-cta">
+    <div class="container">
+      <h2>Ready to Amplify Your Reach?</h2>
+      <p>Start creating campaigns in minutes. No credit card required.</p>
+      <a href="/admin/register" class="btn btn-primary btn-lg">Get Started Free</a>
+    </div>
+  </section>
+</div>
+
+<style>
+  .landing-page {
+    overflow-x: hidden;
+  }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, var(--color-primary) 0%, #2a3158 100%);
+    color: white;
+    padding: var(--spacing-20) 0;
+    text-align: center;
+  }
+
+  .hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 1.1;
+    margin-bottom: var(--spacing-6);
+  }
+
+  .highlight {
+    color: var(--color-secondary);
+  }
+
+  .hero-subtitle {
+    font-size: var(--font-size-xl);
+    color: rgba(255,255,255,0.8);
+    margin-bottom: var(--spacing-8);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-3);
+  }
+
+  .hero-note {
+    font-size: var(--font-size-sm);
+    color: rgba(255,255,255,0.6);
+  }
+
+  /* How It Works */
+  .how-it-works {
+    padding: var(--spacing-20) 0;
+    background: var(--color-gray-50);
+  }
+
+  .how-it-works h2 {
+    text-align: center;
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--spacing-12);
+    color: var(--color-gray-900);
+  }
+
+  .steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-4);
+    flex-wrap: wrap;
+  }
+
+  .step {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-8);
+    text-align: center;
+    max-width: 280px;
+    box-shadow: var(--shadow-md);
+  }
+
+  .step-number {
+    width: 48px;
+    height: 48px;
+    background: var(--color-secondary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    margin: 0 auto var(--spacing-4);
+  }
+
+  .step h3 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-2);
+    color: var(--color-gray-900);
+  }
+
+  .step p {
+    color: var(--color-gray-500);
+    font-size: var(--font-size-sm);
+  }
+
+  .step-arrow {
+    font-size: 2rem;
+    color: var(--color-gray-300);
+  }
+
+  /* Features */
+  .features {
+    padding: var(--spacing-20) 0;
+  }
+
+  .features h2 {
+    text-align: center;
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--spacing-12);
+    color: var(--color-gray-900);
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-6);
+  }
+
+  .feature-card {
+    background: var(--color-gray-50);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+  }
+
+  .feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: var(--spacing-3);
+  }
+
+  .feature-card h3 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-2);
+    color: var(--color-gray-900);
+  }
+
+  .feature-card p {
+    color: var(--color-gray-500);
+    font-size: var(--font-size-sm);
+  }
+
+  /* Email Capture */
+  .email-capture {
+    padding: var(--spacing-16) 0;
+    background: var(--color-gray-50);
+  }
+
+  .capture-box {
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: center;
+    background: white;
+    border-radius: var(--radius-2xl);
+    padding: var(--spacing-10);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .capture-box h2 {
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--spacing-2);
+    color: var(--color-gray-900);
+  }
+
+  .capture-box > p {
+    color: var(--color-gray-500);
+    margin-bottom: var(--spacing-6);
+  }
+
+  .capture-form {
+    display: flex;
+    gap: var(--spacing-2);
+  }
+
+  .capture-form .form-input {
+    flex: 1;
+  }
+
+  .form-message {
+    margin-top: var(--spacing-3);
+    font-size: var(--font-size-sm);
+  }
+
+  .form-message.success {
+    color: var(--color-accent-green);
+  }
+
+  .form-message.error {
+    color: var(--color-accent-pink);
+  }
+
+  /* Final CTA */
+  .final-cta {
+    padding: var(--spacing-20) 0;
+    text-align: center;
+    background: linear-gradient(135deg, var(--color-primary) 0%, #2a3158 100%);
+    color: white;
+  }
+
+  .final-cta h2 {
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--spacing-3);
+  }
+
+  .final-cta p {
+    color: rgba(255,255,255,0.8);
+    margin-bottom: var(--spacing-6);
+  }
+
+  @media (max-width: 768px) {
+    .steps {
+      flex-direction: column;
+    }
+
+    .step-arrow {
+      transform: rotate(90deg);
+    }
+
+    .capture-form {
+      flex-direction: column;
+    }
+  }
+</style>
+
+<script>
+  document.getElementById('leadForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const email = form.email.value;
+    const message = document.getElementById('formMessage');
+
+    try {
+      const res = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'landing_page' })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        message.textContent = data.message;
+        message.className = 'form-message success';
+        form.reset();
+      } else {
+        message.textContent = data.errors?.[0]?.msg || data.error || 'Something went wrong';
+        message.className = 'form-message error';
+      }
+    } catch (err) {
+      message.textContent = 'Failed to submit. Please try again.';
+      message.className = 'form-message error';
+    }
+  });
+</script>

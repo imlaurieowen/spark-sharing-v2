@@ -1,0 +1,132 @@
+<div class="container">
+  <div class="campaigns-page">
+    <div class="page-header">
+      <h1>Campaigns</h1>
+      <a href="/admin/campaigns/new" class="btn btn-primary">Create Campaign</a>
+    </div>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <% if (campaigns.length === 0) { %>
+      <div class="empty-state card">
+        <h2>No campaigns yet</h2>
+        <p>Create your first campaign to start amplifying your message.</p>
+        <a href="/admin/campaigns/new" class="btn btn-primary">Create Your First Campaign</a>
+      </div>
+    <% } else { %>
+      <div class="campaigns-grid">
+        <% campaigns.forEach(campaign => { %>
+          <div class="campaign-card card">
+            <% if (campaign.firstImage) { %>
+              <div class="campaign-image">
+                <img src="<%= campaign.firstImage %>" alt="<%= campaign.title %>">
+              </div>
+            <% } else { %>
+              <div class="campaign-image campaign-image-placeholder">
+                <span>No Image</span>
+              </div>
+            <% } %>
+            <div class="campaign-content">
+              <h3><%= campaign.title %></h3>
+              <p class="campaign-meta">
+                <%= campaign.imageCount %> image<%= campaign.imageCount !== 1 ? 's' : '' %>
+                &middot;
+                Created <%= new Date(campaign.created_at).toLocaleDateString() %>
+              </p>
+              <div class="campaign-actions">
+                <a href="/admin/campaigns/<%= campaign.id %>" class="btn btn-sm btn-outline">View</a>
+                <a href="/admin/campaigns/<%= campaign.id %>/edit" class="btn btn-sm btn-outline">Edit</a>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<style>
+  .campaigns-page {
+    padding: var(--spacing-8) 0;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-6);
+  }
+
+  .page-header h1 {
+    font-size: var(--font-size-3xl);
+    color: var(--color-gray-900);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: var(--spacing-12);
+  }
+
+  .empty-state h2 {
+    color: var(--color-gray-900);
+    margin-bottom: var(--spacing-2);
+  }
+
+  .empty-state p {
+    color: var(--color-gray-500);
+    margin-bottom: var(--spacing-6);
+  }
+
+  .campaigns-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-6);
+  }
+
+  .campaign-card {
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .campaign-image {
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    background: var(--color-gray-100);
+  }
+
+  .campaign-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .campaign-image-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-gray-400);
+  }
+
+  .campaign-content {
+    padding: var(--spacing-4);
+  }
+
+  .campaign-content h3 {
+    font-size: var(--font-size-lg);
+    color: var(--color-gray-900);
+    margin-bottom: var(--spacing-2);
+  }
+
+  .campaign-meta {
+    color: var(--color-gray-500);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .campaign-actions {
+    display: flex;
+    gap: var(--spacing-2);
+  }
+</style>

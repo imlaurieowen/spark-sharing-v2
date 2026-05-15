@@ -1,0 +1,125 @@
+<div class="container">
+  <div class="campaign-detail">
+    <div class="page-header">
+      <a href="/admin/campaigns" class="back-link">&larr; Back to Campaigns</a>
+      <div class="header-row">
+        <h1><%= campaign.title %></h1>
+        <a href="/admin/campaigns/<%= campaign.id %>/edit" class="btn btn-outline">Edit Campaign</a>
+      </div>
+    </div>
+
+    <div class="share-link-box card">
+      <h3>Share Link</h3>
+      <p class="text-gray text-sm mb-4">Share this link with your team, partners, or stakeholders.</p>
+      <div class="share-link-input">
+        <input type="text" value="<%= shareUrl %>" readonly class="form-input" id="shareUrl">
+        <button type="button" class="btn btn-secondary" onclick="copyShareUrl()">Copy</button>
+      </div>
+      <a href="<%= shareUrl %>" target="_blank" class="btn btn-outline mt-4">Preview Share Page &rarr;</a>
+    </div>
+
+    <div class="grid grid-2 mt-6">
+      <div class="card">
+        <h3>Copy Options (<%= copies.length %>)</h3>
+        <% if (copies && copies.length > 0) { %>
+          <div class="copy-list">
+            <% copies.forEach(copy => { %>
+              <div class="copy-item">
+                <% if (copy.label) { %>
+                  <span class="copy-label"><%= copy.label %></span>
+                <% } %>
+                <pre><%= copy.copy_text %></pre>
+              </div>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <div class="social-copy-preview">
+            <pre><%= campaign.social_copy %></pre>
+          </div>
+        <% } %>
+      </div>
+
+      <div class="card">
+        <h3>Images (<%= images.length %>)</h3>
+        <% if (images.length > 0) { %>
+          <div class="images-grid">
+            <% images.forEach(image => { %>
+              <img src="<%= image.image_url %>" alt="">
+            <% }); %>
+          </div>
+        <% } else { %>
+          <p class="text-gray">No images uploaded yet.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <% if (campaign.description) { %>
+      <div class="card mt-6">
+        <h3>Description</h3>
+        <p><%= campaign.description %></p>
+      </div>
+    <% } %>
+
+    <div class="card mt-6">
+      <h3>Details</h3>
+      <dl class="details-list">
+        <div><dt>Created</dt><dd><%= new Date(campaign.created_at).toLocaleString() %></dd></div>
+        <div><dt>Slug</dt><dd><code><%= campaign.slug %></code></dd></div>
+      </dl>
+    </div>
+  </div>
+</div>
+
+<style>
+  .campaign-detail { padding: var(--spacing-8) 0; max-width: 900px; }
+  .page-header { margin-bottom: var(--spacing-6); }
+  .back-link { color: var(--color-gray-500); font-size: var(--font-size-sm); display: inline-block; margin-bottom: var(--spacing-2); }
+  .header-row { display: flex; justify-content: space-between; align-items: center; }
+  .page-header h1 { font-size: var(--font-size-3xl); color: var(--color-gray-900); }
+
+  .share-link-box { background: linear-gradient(135deg, var(--color-primary) 0%, #2a3158 100%); color: white; border: none; }
+  .share-link-box h3 { color: white; }
+  .share-link-box .text-gray { color: rgba(255,255,255,0.7); }
+  .share-link-input { display: flex; gap: var(--spacing-2); }
+  .share-link-input .form-input { flex: 1; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white; }
+
+  .copy-list { display: flex; flex-direction: column; gap: var(--spacing-3); }
+  .copy-item { background: var(--color-gray-50); border-radius: var(--radius-lg); padding: var(--spacing-3); }
+  .copy-label { display: inline-block; background: var(--color-secondary); color: white; font-size: var(--font-size-xs); font-weight: 600; padding: 2px 8px; border-radius: var(--radius-full); margin-bottom: var(--spacing-2); }
+  .copy-item pre { white-space: pre-wrap; font-family: inherit; margin: 0; font-size: var(--font-size-sm); color: var(--color-gray-700); max-height: 100px; overflow-y: auto; }
+
+  .social-copy-preview { background: var(--color-gray-50); border-radius: var(--radius-lg); padding: var(--spacing-4); }
+  .social-copy-preview pre { white-space: pre-wrap; font-family: inherit; margin: 0; }
+
+  .images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: var(--spacing-2); }
+  .images-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--color-gray-200); }
+
+  .details-list { display: grid; gap: var(--spacing-3); }
+  .details-list > div { display: flex; gap: var(--spacing-4); }
+  .details-list dt { color: var(--color-gray-500); min-width: 80px; }
+  .details-list dd { color: var(--color-gray-900); }
+  .details-list code { background: var(--color-gray-100); padding: 2px 6px; border-radius: var(--radius-sm); font-size: var(--font-size-sm); }
+
+  @media (max-width: 768px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .header-row { flex-direction: column; align-items: flex-start; gap: var(--spacing-4); }
+  }
+</style>
+
+<script>
+  window.copyShareUrl = function() {
+    const input = document.getElementById('shareUrl');
+    const btn = document.querySelector('.share-link-input .btn');
+
+    navigator.clipboard.writeText(input.value).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    }).catch(() => {
+      // Fallback for older browsers
+      input.select();
+      document.execCommand('copy');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  };
+</script>

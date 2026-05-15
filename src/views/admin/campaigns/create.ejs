@@ -1,0 +1,249 @@
+<div class="container">
+  <div class="campaign-form-page">
+    <div class="page-header">
+      <a href="/admin/campaigns" class="back-link">&larr; Back to Campaigns</a>
+      <h1>Create Campaign</h1>
+    </div>
+
+    <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+      <div class="alert alert-error">
+        <% errors.forEach(error => { %>
+          <p><%= error.msg %></p>
+        <% }); %>
+      </div>
+    <% } %>
+
+    <form action="/admin/campaigns" method="POST" enctype="multipart/form-data" class="card" id="campaignForm">
+      <div class="form-group">
+        <label for="title" class="form-label">Campaign Title *</label>
+        <input type="text" id="title" name="title" class="form-input" required autofocus>
+      </div>
+
+      <div class="form-group">
+        <label for="description" class="form-label">Description</label>
+        <textarea id="description" name="description" class="form-textarea" rows="2" placeholder="Brief description (optional)"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Copy Options *</label>
+        <p class="text-gray text-sm mb-4">Add different versions of copy for recipients to choose from.</p>
+
+        <div id="copyContainer"></div>
+
+        <button type="button" class="btn btn-outline btn-sm mt-4" id="addCopyBtn">
+          + Add Another Copy Option
+        </button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Images</label>
+        <p class="text-gray text-sm mb-4">Upload multiple images for recipients to choose from.</p>
+        <div class="file-upload">
+          <input type="file" id="imageInput" name="images" multiple accept="image/*" class="file-input">
+          <div class="file-upload-content">
+            <div class="file-upload-icon">+</div>
+            <p>Click to upload images</p>
+          </div>
+        </div>
+        <div id="previewContainer" class="image-preview"></div>
+      </div>
+
+      <div class="form-actions">
+        <a href="/admin/campaigns" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-primary">Create Campaign</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .campaign-form-page { padding: var(--spacing-8) 0; max-width: 700px; }
+  .page-header { margin-bottom: var(--spacing-6); }
+  .back-link { color: var(--color-gray-500); font-size: var(--font-size-sm); display: inline-block; margin-bottom: var(--spacing-2); }
+  .page-header h1 { font-size: var(--font-size-3xl); color: var(--color-gray-900); }
+
+  .copy-option {
+    background: var(--color-gray-50);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-3);
+  }
+  .copy-option-header { display: flex; gap: var(--spacing-2); margin-bottom: var(--spacing-3); }
+  .copy-label-input { flex: 1; }
+  .remove-copy-btn { color: var(--color-accent-pink); border-color: var(--color-accent-pink); padding: 0 12px; }
+
+  .file-upload {
+    position: relative;
+    border: 2px dashed var(--color-gray-300);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-8);
+    text-align: center;
+    cursor: pointer;
+  }
+  .file-upload:hover { border-color: var(--color-secondary); background: var(--color-gray-50); }
+  .file-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .file-upload-icon { font-size: 2rem; color: var(--color-gray-400); margin-bottom: var(--spacing-2); }
+
+  .image-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: var(--spacing-2);
+    margin-top: var(--spacing-4);
+  }
+  .preview-item { position: relative; }
+  .preview-item img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--color-gray-200); }
+  .preview-remove {
+    position: absolute; top: 4px; right: 4px;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--color-accent-pink); color: white;
+    border: none; cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .form-actions {
+    display: flex; justify-content: flex-end; gap: var(--spacing-3);
+    margin-top: var(--spacing-6); padding-top: var(--spacing-6);
+    border-top: 1px solid var(--color-gray-200);
+  }
+</style>
+
+<script>
+(function() {
+  // State
+  var copyCount = 0;
+  var fileList = [];
+
+  // DOM refs
+  var copyContainer = document.getElementById('copyContainer');
+  var addCopyBtn = document.getElementById('addCopyBtn');
+  var imageInput = document.getElementById('imageInput');
+  var previewContainer = document.getElementById('previewContainer');
+
+  // Add first copy option on load
+  addCopyOption();
+
+  // Event: Add copy button
+  addCopyBtn.addEventListener('click', function() {
+    addCopyOption();
+  });
+
+  // Event: Image input change
+  imageInput.addEventListener('change', function() {
+    var files = this.files;
+    for (var i = 0; i < files.length; i++) {
+      var file = files[i];
+      // Check if already added
+      var exists = false;
+      for (var j = 0; j < fileList.length; j++) {
+        if (fileList[j].name === file.name && fileList[j].size === file.size) {
+          exists = true;
+          break;
+        }
+      }
+      if (!exists) {
+        fileList.push(file);
+      }
+    }
+    renderPreviews();
+    syncFileInput();
+  });
+
+  function addCopyOption() {
+    copyCount++;
+    var id = copyCount;
+
+    var div = document.createElement('div');
+    div.className = 'copy-option';
+    div.id = 'copy-' + id;
+
+    var header = document.createElement('div');
+    header.className = 'copy-option-header';
+
+    var labelInput = document.createElement('input');
+    labelInput.type = 'text';
+    labelInput.name = 'copyLabel';
+    labelInput.className = 'form-input copy-label-input';
+    labelInput.placeholder = "Label (e.g., 'Professional')";
+
+    var removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'btn btn-sm btn-outline remove-copy-btn';
+    removeBtn.innerHTML = '&times;';
+    removeBtn.addEventListener('click', function() {
+      removeCopyOption(id);
+    });
+
+    header.appendChild(labelInput);
+    header.appendChild(removeBtn);
+
+    var textarea = document.createElement('textarea');
+    textarea.name = 'copyText';
+    textarea.className = 'form-textarea';
+    textarea.rows = 4;
+    textarea.placeholder = 'The social copy text...';
+    textarea.required = true;
+
+    div.appendChild(header);
+    div.appendChild(textarea);
+    copyContainer.appendChild(div);
+
+    updateRemoveButtons();
+  }
+
+  function removeCopyOption(id) {
+    var el = document.getElementById('copy-' + id);
+    if (el) el.remove();
+    updateRemoveButtons();
+  }
+
+  function updateRemoveButtons() {
+    var options = copyContainer.querySelectorAll('.copy-option');
+    var btns = copyContainer.querySelectorAll('.remove-copy-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].style.display = options.length > 1 ? 'block' : 'none';
+    }
+  }
+
+  function renderPreviews() {
+    previewContainer.innerHTML = '';
+    for (var i = 0; i < fileList.length; i++) {
+      (function(index) {
+        var file = fileList[index];
+        var div = document.createElement('div');
+        div.className = 'preview-item';
+
+        var img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.alt = 'Preview';
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'preview-remove';
+        btn.innerHTML = '&times;';
+        btn.addEventListener('click', function() {
+          removeFile(index);
+        });
+
+        div.appendChild(img);
+        div.appendChild(btn);
+        previewContainer.appendChild(div);
+      })(i);
+    }
+  }
+
+  function removeFile(index) {
+    fileList.splice(index, 1);
+    renderPreviews();
+    syncFileInput();
+  }
+
+  function syncFileInput() {
+    var dt = new DataTransfer();
+    for (var i = 0; i < fileList.length; i++) {
+      dt.items.add(fileList[i]);
+    }
+    imageInput.files = dt.files;
+  }
+})();
+</script>
