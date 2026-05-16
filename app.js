@@ -71,9 +71,20 @@ app.use(trackPageViews);
 // Routes
 app.use('/', require('./src/routes'));
 
-// Health check
+// Health check - simple ping that always works
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
+// Deep health check - tests database
+app.get('/health/deep', async (req, res) => {
+  try {
+    const { sql } = require('./src/config/database');
+    await sql`SELECT 1`;
+    res.json({ status: 'healthy', database: 'connected', timestamp: new Date().toISOString() });
+  } catch (err) {
+    res.status(503).json({ status: 'unhealthy', database: 'disconnected', error: err.message });
+  }
 });
 
 // 404 handler
