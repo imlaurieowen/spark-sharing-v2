@@ -1,17 +1,17 @@
 const { sql } = require('../config/database');
 
-async function create({ campaignId, imageUrl, displayOrder = 0 }) {
+async function create({ campaignId, imageUrl, displayOrder = 0, caption = null }) {
   const result = await sql`
-    INSERT INTO campaign_images (campaign_id, image_url, display_order)
-    VALUES (${campaignId}, ${imageUrl}, ${displayOrder})
-    RETURNING id, campaign_id, image_url, display_order, created_at
+    INSERT INTO campaign_images (campaign_id, image_url, display_order, caption)
+    VALUES (${campaignId}, ${imageUrl}, ${displayOrder}, ${caption})
+    RETURNING id, campaign_id, image_url, display_order, caption, created_at
   `;
   return result[0];
 }
 
 async function findByCampaignId(campaignId) {
   const result = await sql`
-    SELECT id, campaign_id, image_url, display_order, created_at
+    SELECT id, campaign_id, image_url, display_order, caption, created_at
     FROM campaign_images
     WHERE campaign_id = ${campaignId}
     ORDER BY display_order ASC, created_at ASC
@@ -21,9 +21,19 @@ async function findByCampaignId(campaignId) {
 
 async function findById(id) {
   const result = await sql`
-    SELECT id, campaign_id, image_url, display_order, created_at
+    SELECT id, campaign_id, image_url, display_order, caption, created_at
     FROM campaign_images
     WHERE id = ${id}
+  `;
+  return result[0] || null;
+}
+
+async function updateCaption(id, caption) {
+  const result = await sql`
+    UPDATE campaign_images
+    SET caption = ${caption}
+    WHERE id = ${id}
+    RETURNING id, campaign_id, image_url, display_order, caption, created_at
   `;
   return result[0] || null;
 }
@@ -62,5 +72,6 @@ module.exports = {
   findById,
   remove,
   removeByCampaignId,
-  updateOrder
+  updateOrder,
+  updateCaption
 };

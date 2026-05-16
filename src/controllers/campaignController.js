@@ -441,7 +441,8 @@ async function duplicate(req, res) {
       await CampaignImage.create({
         campaignId: newCampaign.id,
         imageUrl: image.image_url,
-        displayOrder: image.display_order
+        displayOrder: image.display_order,
+        caption: image.caption
       });
     }
 
@@ -490,6 +491,31 @@ async function removeImage(req, res) {
   }
 }
 
+// Update image caption
+async function updateImageCaption(req, res) {
+  try {
+    const image = await CampaignImage.findById(req.params.imageId);
+
+    if (!image) {
+      return res.status(404).json({ error: 'Image not found' });
+    }
+
+    // Verify campaign ownership
+    const campaign = await Campaign.findById(image.campaign_id);
+    if (!campaign || campaign.user_id !== req.user.id) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const { caption } = req.body;
+    const updated = await CampaignImage.updateCaption(image.id, caption || null);
+
+    res.json({ message: 'Caption updated successfully', image: updated });
+  } catch (error) {
+    console.error('Update caption error:', error);
+    res.status(500).json({ error: 'Failed to update caption' });
+  }
+}
+
 module.exports = {
   list,
   createForm,
@@ -499,6 +525,7 @@ module.exports = {
   update,
   remove,
   removeImage,
+  updateImageCaption,
   duplicate,
   campaignValidation
 };

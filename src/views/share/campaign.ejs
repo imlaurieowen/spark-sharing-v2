@@ -140,6 +140,15 @@
       height: auto;
       display: block;
     }
+    .image-caption {
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #64748b;
+      text-align: center;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+    }
     .image-item:hover {
       border-color: #93c5fd;
       transform: scale(1.02);
@@ -491,6 +500,9 @@
         <% images.forEach(function(image, index) { %>
           <div class="image-item<%= index === 0 ? ' selected' : '' %>" data-index="<%= index %>" data-url="<%= image.image_url %>">
             <img src="<%= image.image_url %>" alt="">
+            <% if (image.caption) { %>
+              <div class="image-caption"><%= image.caption %></div>
+            <% } %>
           </div>
         <% }); %>
       </div>

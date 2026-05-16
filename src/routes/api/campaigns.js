@@ -41,4 +41,7 @@ router.delete('/:id', campaignController.remove);
 // DELETE /api/campaigns/images/:imageId - Delete single image
 router.delete('/images/:imageId', campaignController.removeImage);
 
+// PATCH /api/campaigns/images/:imageId/caption - Update image caption
+router.patch('/images/:imageId/caption', campaignController.updateImageCaption);
+
 module.exports = router;

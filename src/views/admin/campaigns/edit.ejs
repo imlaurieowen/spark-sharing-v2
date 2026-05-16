@@ -47,11 +47,13 @@
 
       <div class="form-group">
         <label class="form-label">Current Images</label>
+        <p class="text-gray text-sm mb-4">Add a caption to help people know which image to use (e.g., "Wide", "Vertical", "Square").</p>
         <% if (images.length > 0) { %>
           <div class="current-images" id="currentImages">
             <% images.forEach(function(image) { %>
               <div class="current-image" data-id="<%= image.id %>">
                 <img src="<%= image.image_url %>" alt="">
+                <input type="text" class="caption-input" data-image-id="<%= image.id %>" value="<%= image.caption || '' %>" placeholder="Caption (e.g., Wide, Vertical)">
                 <button type="button" class="delete-image-btn" data-image-id="<%= image.id %>">&times;</button>
               </div>
             <% }); %>
@@ -106,9 +108,29 @@
   .copy-label-input { flex: 1; }
   .remove-copy-btn { color: var(--color-accent-pink); border-color: var(--color-accent-pink); padding: 0 12px; }
 
-  .current-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: var(--spacing-2); }
-  .current-image { position: relative; }
-  .current-image img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--color-gray-200); }
+  .current-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--spacing-3); }
+  .current-image { position: relative; display: flex; flex-direction: column; gap: var(--spacing-2); }
+  .current-image img { width: 100%; height: auto; object-fit: contain; border-radius: var(--radius-md); border: 1px solid var(--color-gray-200); background: var(--color-gray-50); }
+  .caption-input {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: var(--font-size-xs);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-sm);
+    background: white;
+  }
+  .caption-input:focus {
+    outline: none;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
+  }
+  .caption-input.saving {
+    background: var(--color-gray-50);
+    color: var(--color-gray-500);
+  }
+  .caption-input.saved {
+    border-color: #22c55e;
+  }
   .delete-image-btn {
     position: absolute; top: 4px; right: 4px;
     width: 24px; height: 24px; border-radius: 50%;
@@ -265,8 +287,11 @@
     syncFileInput();
   });
 
-  // Event: Delete existing images
+  // Event: Delete existing images and handle caption changes
   if (currentImages) {
+    // Debounce helper
+    var captionTimeouts = {};
+
     currentImages.addEventListener('click', function(e) {
       var btn = e.target.closest('.delete-image-btn');
       if (!btn) return;
@@ -286,6 +311,45 @@
         .catch(function() {
           alert('Failed to delete image');
         });
+    });
+
+    // Caption auto-save with debounce
+    currentImages.addEventListener('input', function(e) {
+      var input = e.target.closest('.caption-input');
+      if (!input) return;
+
+      var imageId = input.getAttribute('data-image-id');
+
+      // Clear existing timeout
+      if (captionTimeouts[imageId]) {
+        clearTimeout(captionTimeouts[imageId]);
+      }
+
+      // Mark as saving
+      input.classList.add('saving');
+      input.classList.remove('saved');
+
+      // Debounce: save after 500ms of no typing
+      captionTimeouts[imageId] = setTimeout(function() {
+        fetch('/api/campaigns/images/' + imageId + '/caption', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ caption: input.value })
+        })
+          .then(function(res) {
+            input.classList.remove('saving');
+            if (res.ok) {
+              input.classList.add('saved');
+              setTimeout(function() { input.classList.remove('saved'); }, 1500);
+            } else {
+              alert('Failed to save caption');
+            }
+          })
+          .catch(function() {
+            input.classList.remove('saving');
+            alert('Failed to save caption');
+          });
+      }, 500);
     });
   }
 

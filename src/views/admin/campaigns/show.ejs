@@ -49,7 +49,12 @@
         <% if (images.length > 0) { %>
           <div class="images-grid">
             <% images.forEach(image => { %>
-              <img src="<%= image.image_url %>" alt="">
+              <div class="image-with-caption">
+                <img src="<%= image.image_url %>" alt="">
+                <% if (image.caption) { %>
+                  <span class="image-caption"><%= image.caption %></span>
+                <% } %>
+              </div>
             <% }); %>
           </div>
         <% } else { %>
@@ -98,7 +103,9 @@
 
   .header-actions { display: flex; gap: var(--spacing-2); }
   .images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--spacing-3); }
+  .image-with-caption { display: flex; flex-direction: column; gap: 4px; }
   .images-grid img { width: 100%; height: auto; object-fit: contain; border-radius: var(--radius-md); border: 1px solid var(--color-gray-200); background: var(--color-gray-50); }
+  .image-caption { font-size: var(--font-size-xs); color: var(--color-gray-500); text-align: center; }
 
   .details-list { display: grid; gap: var(--spacing-3); }
   .details-list > div { display: flex; gap: var(--spacing-4); }
