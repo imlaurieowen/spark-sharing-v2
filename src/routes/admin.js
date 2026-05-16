@@ -66,5 +66,6 @@ router.get('/campaigns/:id', campaignController.show);
 router.get('/campaigns/:id/edit', campaignController.editForm);
 router.put('/campaigns/:id', upload.array('images', 10), campaignController.campaignValidation, campaignController.update);
 router.delete('/campaigns/:id', campaignController.remove);
+router.post('/campaigns/:id/duplicate', campaignController.duplicate);
 
 module.exports = router;

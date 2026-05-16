@@ -4,7 +4,12 @@
       <a href="/admin/campaigns" class="back-link">&larr; Back to Campaigns</a>
       <div class="header-row">
         <h1><%= campaign.title %></h1>
-        <a href="/admin/campaigns/<%= campaign.id %>/edit" class="btn btn-outline">Edit Campaign</a>
+        <div class="header-actions">
+          <form action="/admin/campaigns/<%= campaign.id %>/duplicate" method="POST" style="display:inline;">
+            <button type="submit" class="btn btn-outline">Duplicate</button>
+          </form>
+          <a href="/admin/campaigns/<%= campaign.id %>/edit" class="btn btn-outline">Edit Campaign</a>
+        </div>
       </div>
     </div>
 
@@ -91,8 +96,9 @@
   .social-copy-preview { background: var(--color-gray-50); border-radius: var(--radius-lg); padding: var(--spacing-4); }
   .social-copy-preview pre { white-space: pre-wrap; font-family: inherit; margin: 0; }
 
-  .images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: var(--spacing-2); }
-  .images-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--color-gray-200); }
+  .header-actions { display: flex; gap: var(--spacing-2); }
+  .images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--spacing-3); }
+  .images-grid img { width: 100%; height: auto; object-fit: contain; border-radius: var(--radius-md); border: 1px solid var(--color-gray-200); background: var(--color-gray-50); }
 
   .details-list { display: grid; gap: var(--spacing-3); }
   .details-list > div { display: flex; gap: var(--spacing-4); }

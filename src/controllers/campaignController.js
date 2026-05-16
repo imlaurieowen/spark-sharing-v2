@@ -395,6 +395,73 @@ async function remove(req, res) {
   }
 }
 
+// Duplicate campaign
+async function duplicate(req, res) {
+  try {
+    const campaign = await Campaign.findById(req.params.id);
+
+    if (!campaign || campaign.user_id !== req.user.id) {
+      if (req.path.startsWith('/api')) {
+        return res.status(404).json({ error: 'Campaign not found' });
+      }
+      return res.redirect('/admin/campaigns');
+    }
+
+    // Get original images and copies
+    const images = await CampaignImage.findByCampaignId(campaign.id);
+    const copies = await CampaignCopy.findByCampaignId(campaign.id);
+
+    // Generate new unique slug
+    let newSlug = slugify(campaign.title + ' Copy');
+    if (await Campaign.slugExists(newSlug)) {
+      newSlug = generateUniqueSlug(newSlug);
+    }
+
+    // Create new campaign
+    const newCampaign = await Campaign.create({
+      userId: req.user.id,
+      title: campaign.title + ' (Copy)',
+      slug: newSlug,
+      description: campaign.description || '',
+      socialCopy: campaign.social_copy || ''
+    });
+
+    // Duplicate copies
+    for (const copy of copies) {
+      await CampaignCopy.create({
+        campaignId: newCampaign.id,
+        label: copy.label,
+        copyText: copy.copy_text,
+        displayOrder: copy.display_order
+      });
+    }
+
+    // Duplicate images (reference same URLs since they're in R2)
+    for (const image of images) {
+      await CampaignImage.create({
+        campaignId: newCampaign.id,
+        imageUrl: image.image_url,
+        displayOrder: image.display_order
+      });
+    }
+
+    if (req.path.startsWith('/api')) {
+      return res.status(201).json({
+        message: 'Campaign duplicated successfully',
+        campaign: newCampaign
+      });
+    }
+
+    res.redirect(`/admin/campaigns/${newCampaign.id}`);
+  } catch (error) {
+    console.error('Duplicate campaign error:', error);
+    if (req.path.startsWith('/api')) {
+      return res.status(500).json({ error: 'Failed to duplicate campaign' });
+    }
+    res.redirect('/admin/campaigns');
+  }
+}
+
 // Delete single image
 async function removeImage(req, res) {
   try {
@@ -432,5 +499,6 @@ module.exports = {
   update,
   remove,
   removeImage,
+  duplicate,
   campaignValidation
 };
