@@ -153,6 +153,30 @@
       border-color: #93c5fd;
       transform: scale(1.02);
     }
+    .download-all-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+      color: #94a3b8;
+      font-size: 14px;
+    }
+    .download-all-btn {
+      background: none;
+      border: none;
+      color: #3b82f6;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .download-all-btn:hover {
+      background: #eff6ff;
+      text-decoration: underline;
+    }
     .image-item.selected {
       border-color: #3b82f6;
     }
@@ -200,9 +224,9 @@
       gap: 8px;
     }
     .copy-arrow {
-      width: 36px;
-      height: 36px;
-      border: 1px solid #e2e8f0;
+      width: 44px;
+      height: 44px;
+      border: 2px solid #3b82f6;
       border-radius: 50%;
       background: white;
       cursor: pointer;
@@ -210,15 +234,23 @@
       align-items: center;
       justify-content: center;
       transition: all 0.2s;
-      color: #64748b;
+      color: #3b82f6;
+      font-size: 18px;
+      font-weight: 600;
     }
     .copy-arrow:hover {
-      background: #f8fafc;
-      border-color: #cbd5e1;
+      background: #3b82f6;
+      color: white;
     }
     .copy-arrow:disabled {
-      opacity: 0.4;
+      opacity: 0.3;
       cursor: not-allowed;
+      border-color: #cbd5e1;
+      color: #cbd5e1;
+    }
+    .copy-arrow:disabled:hover {
+      background: white;
+      color: #cbd5e1;
     }
     .copy-text {
       font-size: 15px;
@@ -506,6 +538,12 @@
           </div>
         <% }); %>
       </div>
+      <% if (images.length > 1) { %>
+      <div class="download-all-row">
+        <span>or</span>
+        <button type="button" class="download-all-btn" id="downloadAllBtn">Download all images</button>
+      </div>
+      <% } %>
       <% } else { %>
       <div style="text-align:center;padding:40px;color:#64748b;">No images available</div>
       <% } %>
@@ -681,6 +719,25 @@
       goToStep(2);
       updateCopyDisplay();
     });
+
+    // Download all images
+    var downloadAllBtn = document.getElementById('downloadAllBtn');
+    if (downloadAllBtn) {
+      downloadAllBtn.addEventListener('click', function() {
+        images.forEach(function(url, index) {
+          setTimeout(function() {
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = '';
+            a.target = '_blank';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          }, index * 300); // Stagger downloads
+        });
+        showToast('Downloading ' + images.length + ' images...');
+      });
+    }
 
     // Step 2: Copy selection
     var copyLabel = document.getElementById('copyLabel');
