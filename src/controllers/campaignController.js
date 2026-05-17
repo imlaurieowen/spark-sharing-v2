@@ -131,11 +131,15 @@ async function create(req, res) {
     // Handle image uploads
     if (req.files && req.files.length > 0) {
       for (let i = 0; i < req.files.length; i++) {
-        const imageUrl = await uploadService.uploadImage(req.files[i]);
+        const file = req.files[i];
+        const imageUrl = await uploadService.uploadImage(file);
+        // Use filename (without extension) as default caption
+        const caption = file.originalname.replace(/\.[^/.]+$/, '');
         await CampaignImage.create({
           campaignId: campaign.id,
           imageUrl,
-          displayOrder: i
+          displayOrder: i,
+          caption
         });
       }
     }
@@ -332,11 +336,15 @@ async function update(req, res) {
       const startOrder = existingImages.length;
 
       for (let i = 0; i < req.files.length; i++) {
-        const imageUrl = await uploadService.uploadImage(req.files[i]);
+        const file = req.files[i];
+        const imageUrl = await uploadService.uploadImage(file);
+        // Use filename (without extension) as default caption
+        const caption = file.originalname.replace(/\.[^/.]+$/, '');
         await CampaignImage.create({
           campaignId: campaign.id,
           imageUrl,
-          displayOrder: startOrder + i
+          displayOrder: startOrder + i,
+          caption
         });
       }
     }
