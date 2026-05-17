@@ -700,20 +700,16 @@
       setTimeout(function() { toast.classList.remove('show'); }, 2000);
     }
 
-    // Force download an image (works for cross-origin)
+    // Force download an image via server proxy
     function forceDownload(url, filename) {
-      return fetch(url)
-        .then(function(response) { return response.blob(); })
-        .then(function(blob) {
-          var blobUrl = URL.createObjectURL(blob);
-          var a = document.createElement('a');
-          a.href = blobUrl;
-          a.download = filename || url.split('/').pop() || 'image';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(blobUrl);
-        });
+      var proxyUrl = '/download?url=' + encodeURIComponent(url) + '&name=' + encodeURIComponent(filename || 'image.png');
+      var a = document.createElement('a');
+      a.href = proxyUrl;
+      a.download = filename || 'image.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      return Promise.resolve();
     }
 
     function goToStep(n) {
