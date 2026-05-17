@@ -700,6 +700,22 @@
       setTimeout(function() { toast.classList.remove('show'); }, 2000);
     }
 
+    // Force download an image (works for cross-origin)
+    function forceDownload(url, filename) {
+      return fetch(url)
+        .then(function(response) { return response.blob(); })
+        .then(function(blob) {
+          var blobUrl = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = filename || url.split('/').pop() || 'image';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+        });
+    }
+
     function goToStep(n) {
       steps[currentStep].classList.remove('active');
       currentStep = n;
@@ -735,18 +751,12 @@
     var downloadAllBtn = document.getElementById('downloadAllBtn');
     if (downloadAllBtn) {
       downloadAllBtn.addEventListener('click', function() {
+        showToast('Downloading ' + images.length + ' images...');
         images.forEach(function(url, index) {
           setTimeout(function() {
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = '';
-            a.target = '_blank';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-          }, index * 300); // Stagger downloads
+            forceDownload(url, 'image-' + (index + 1) + '.png');
+          }, index * 500); // Stagger downloads
         });
-        showToast('Downloading ' + images.length + ' images...');
       });
     }
 
@@ -852,9 +862,13 @@
       });
     });
 
-    downloadBtn.addEventListener('click', function() {
-      downloadedDone = true;
-      action2.classList.add('done');
+    downloadBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      forceDownload(images[selectedImageIndex], 'image.png').then(function() {
+        downloadedDone = true;
+        action2.classList.add('done');
+        downloadBtn.innerHTML = '✓ Downloaded!';
+      });
     });
 
     openPlatformBtn.addEventListener('click', function() {
